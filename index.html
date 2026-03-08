@@ -1,4 +1,4 @@
-<style>
+<style type="text/css">
 .mv-wrapper {
   --bg: #1d1f25;
   --card: #1f2230;
@@ -15,23 +15,12 @@
   margin: 0 auto;
 }
 
-.mv-wrapper * {
-  box-sizing: border-box;
-}
+.mv-wrapper * { box-sizing: border-box; }
 
-.mv-wrapper main {
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
+.mv-wrapper main { opacity: 0; transition: opacity 0.8s ease; }
+.mv-wrapper main.loaded { opacity: 1; }
 
-.mv-wrapper main.loaded {
-  opacity: 1;
-}
-
-.mv-category {
-  margin-top: 40px;
-}
-
+.mv-category { margin-top: 40px; }
 .mv-category h2 {
   margin: 0 0 18px;
   font-size: 22px;
@@ -56,10 +45,7 @@
   transition: opacity 0.5s ease, transform 0.5s ease, box-shadow .25s ease, background .25s ease;
 }
 
-.mv-card.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+.mv-card.show { opacity: 1; transform: translateY(0); }
 
 .mv-card:hover {
   transform: translateY(-4px);
@@ -67,104 +53,34 @@
   background: var(--card-hover);
 }
 
-.mv-photo {
-  aspect-ratio: 1 / 1;
-  background: #0c0f1f;
-  overflow: hidden;
-}
+.mv-photo { aspect-ratio: 1 / 1; background: #0c0f1f; overflow: hidden; display: grid; place-items: center; }
+.mv-photo img { width: 100%; height: 100%; object-fit: cover; }
 
-.mv-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.mv-content { padding: 14px; display: grid; gap: 8px; }
+.mv-name { font-weight: 600; }
+.mv-name a { color: var(--text); text-decoration: none; transition: .2s; }
+.mv-name a:hover { color: var(--accent); }
 
-.mv-content {
-  padding: 14px;
-  display: grid;
-  gap: 8px;
-}
+.mv-rank { color: var(--muted); font-size: 14px; }
+.mv-details { background: #0f1220; border: 1px solid var(--border); border-radius: 12px; padding: 8px; }
+.mv-details summary { cursor: pointer; color: var(--accent); }
 
-.mv-name {
-  font-weight: 600;
-}
+.mv-awards { margin-top: 8px; display: grid; gap: 6px; font-size: 14px; }
+.mv-award { padding-left: 12px; position: relative; }
+.mv-award::before { content: "•"; position: absolute; left: 0; color: var(--accent); }
 
-.mv-name a {
-  color: var(--text);
-  text-decoration: none;
-  transition: .2s;
-}
-
-.mv-name a:hover {
-  color: var(--accent);
-}
-
-.mv-rank {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.mv-details {
-  background: #0f1220;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px;
-}
-
-.mv-details summary {
-  cursor: pointer;
-  color: var(--accent);
-}
-
-.mv-awards {
-  margin-top: 8px;
-  display: grid;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.mv-award {
-  padding-left: 12px;
-  position: relative;
-}
-
-.mv-award::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: var(--accent);
-}
-
-/* Лоадер (без fixed!) */
-#mv-loader {
-  width: 100%;
-  padding: 40px 0;
-  display: flex;
-  justify-content: center;
-}
-
-.mv-spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid rgba(77,163,255,0.2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: mv-spin 1s linear infinite;
-}
-
-@keyframes mv-spin {
-  to { transform: rotate(360deg); }
-}
+#mv-loader { width: 100%; padding: 40px 0; display: flex; justify-content: center; }
+.mv-spinner { width: 60px; height: 60px; border: 6px solid rgba(77,163,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: mv-spin 1s linear infinite; }
+@keyframes mv-spin { to { transform: rotate(360deg); } }
 </style>
 
 <div class="mv-wrapper">
-  <div id="mv-loader"><div class="mv-spinner"></div></div>
-  <main id="mv-container"></main>
+  <div id="mv-loader"><div class="mv-spinner">&#8203;</div></div>
+  <main id="mv-container">&#8203;</main>
 </div>
 
 <script>
 (function() {
-
   const sheetID = "1SkPMyszoGWxjGqaAwD-u_e5GdQ9zF-3WrZXAmKV59pE";
   const sheetName = "Лист1";
   const url = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(sheetName)}`;
@@ -173,56 +89,18 @@
   const loader = document.getElementById("mv-loader");
 
   const rankCategories = [
-    {
-      title: "Высший начальствующий состав",
-      ranks: [
-        "генерал-полковник полиции",
-        "генерал-лейтенант полиции",
-        "генерал-майор полиции"
-      ]
-    },
-    {
-      title: "Старший начальствующий состав",
-      ranks: [
-        "полковник полиции",
-        "подполковник полиции",
-        "майор полиции"
-      ]
-    },
-    {
-      title: "Средний начальствующий состав",
-      ranks: [
-        "капитан полиции",
-        "старший лейтенант полиции",
-        "лейтенант полиции"
-      ]
-    },
-    {
-      title: "Младший начальствующий состав",
-      ranks: [
-        "прапорщик полиции",
-        "старшина полиции",
-        "сержант полиции"
-      ]
-    },
-    {
-      title: "Рядовой состав",
-      ranks: [
-        "рядовой полиции"
-      ]
-    }
+    { title: "Высший начальствующий состав", ranks: ["генерал-полковник полиции","генерал-лейтенант полиции","генерал-майор полиции"] },
+    { title: "Старший начальствующий состав", ranks: ["полковник полиции","подполковник полиции","майор полиции"] },
+    { title: "Средний начальствующий состав", ranks: ["капитан полиции","старший лейтенант полиции","лейтенант полиции"] },
+    { title: "Младший начальствующий состав", ranks: ["прапорщик полиции","старшина полиции","сержант полиции"] },
+    { title: "Рядовой состав", ranks: ["рядовой полиции"] }
   ];
 
-  function normalizeRank(rank) {
-    return rank ? rank.toLowerCase().trim() : "";
-  }
+  function normalizeRank(rank) { return rank ? rank.toLowerCase().trim() : ""; }
 
   fetch(url)
     .then(res => res.json())
-    .then(data => {
-      if (!Array.isArray(data)) throw new Error("Invalid data format");
-      render(data);
-    })
+    .then(data => { if (!Array.isArray(data)) throw new Error("Invalid data format"); render(data); })
     .catch(err => {
       console.error(err);
       container.innerHTML = "<p style='color:red;text-align:center;'>Ошибка загрузки данных.</p>";
@@ -234,63 +112,93 @@
     container.innerHTML = "";
 
     rankCategories.forEach(category => {
+      let employees = data.filter(person => category.ranks.includes(normalizeRank(person.rank)));
 
-      let employees = data.filter(person => {
-        const rank = normalizeRank(person.rank);
-        return category.ranks.includes(rank);
-      });
-
-      employees.sort((a, b) => {
-
+      employees.sort((a,b) => {
         const isHeroA = a.awards?.toLowerCase().startsWith("герой республики провинция") ? 1 : 0;
         const isHeroB = b.awards?.toLowerCase().startsWith("герой республики провинция") ? 1 : 0;
-
-        if (isHeroA !== isHeroB) return isHeroB - isHeroA;
+        if(isHeroA!==isHeroB) return isHeroB - isHeroA;
 
         const indexA = category.ranks.indexOf(normalizeRank(a.rank));
         const indexB = category.ranks.indexOf(normalizeRank(b.rank));
-        if (indexA !== indexB) return indexA - indexB;
+        if(indexA!==indexB) return indexA - indexB;
 
-        return (a.name || "").localeCompare(b.name || "", "ru");
+        return (a.name||"").localeCompare(b.name||"", "ru");
       });
 
-      if (!employees.length) return;
+      if(!employees.length) return;
 
       const section = document.createElement("section");
       section.className = "mv-category";
-      section.innerHTML = `<h2>${category.title}</h2><div class="mv-grid"></div>`;
+      const h2 = document.createElement("h2");
+      h2.textContent = category.title;
+      section.appendChild(h2);
 
-      const grid = section.querySelector(".mv-grid");
+      const grid = document.createElement("div");
+      grid.className = "mv-grid";
+      section.appendChild(grid);
 
       employees.forEach(person => {
-
-        const awards = person.awards
-          ? person.awards.split(";")
-              .map(a => `<div class="mv-award">${a.trim()}</div>`)
-              .join("")
-          : "";
-
-        const photo = person.photo
-          ? `<img src="${person.photo}" alt="${person.name || ""}">`
-          : `<div style="display:grid;place-items:center;height:100%;color:#777;">Нет фото</div>`;
-
-        const nameHtml = person.forum_url
-          ? `<a href="${person.forum_url}" target="_blank" rel="noopener noreferrer">${person.name || ""}</a>`
-          : (person.name || "");
-
         const card = document.createElement("article");
         card.className = "mv-card";
-        card.innerHTML = `
-          <div class="mv-photo">${photo}</div>
-          <div class="mv-content">
-            <div class="mv-name">${nameHtml}</div>
-            <div class="mv-rank">${person.rank || ""}</div>
-            <details class="mv-details">
-              <summary>Награды</summary>
-              <div class="mv-awards">${awards}</div>
-            </details>
-          </div>
-        `;
+
+        // Фото
+        const photoDiv = document.createElement("div");
+        photoDiv.className = "mv-photo";
+        if(person.photo) {
+          const img = document.createElement("img");
+          img.src = person.photo;
+          img.alt = person.name || "";
+          photoDiv.appendChild(img);
+        } else {
+          photoDiv.textContent = "Нет фото";
+        }
+
+        // Контент
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "mv-content";
+
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "mv-name";
+        if(person.forum_url) {
+          const a = document.createElement("a");
+          a.href = person.forum_url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.textContent = person.name || "";
+          nameDiv.appendChild(a);
+        } else {
+          nameDiv.textContent = person.name || "";
+        }
+
+        const rankDiv = document.createElement("div");
+        rankDiv.className = "mv-rank";
+        rankDiv.textContent = person.rank || "";
+
+        const details = document.createElement("details");
+        details.className = "mv-details";
+        const summary = document.createElement("summary");
+        summary.textContent = "Награды";
+        details.appendChild(summary);
+
+        const awardsDiv = document.createElement("div");
+        awardsDiv.className = "mv-awards";
+        if(person.awards) {
+          person.awards.split(";").forEach(a => {
+            const award = document.createElement("div");
+            award.className = "mv-award";
+            award.textContent = a.trim();
+            awardsDiv.appendChild(award);
+          });
+        }
+        details.appendChild(awardsDiv);
+
+        contentDiv.appendChild(nameDiv);
+        contentDiv.appendChild(rankDiv);
+        contentDiv.appendChild(details);
+
+        card.appendChild(photoDiv);
+        card.appendChild(contentDiv);
 
         grid.appendChild(card);
       });
@@ -302,11 +210,7 @@
     container.classList.add("loaded");
 
     const cards = container.querySelectorAll(".mv-card");
-    cards.forEach((card, index) => {
-      setTimeout(() => {
-        card.classList.add("show");
-      }, index * 60);
-    });
+    cards.forEach((card, index) => setTimeout(()=>card.classList.add("show"), index*60));
   }
 
 })();
