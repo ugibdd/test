@@ -1,451 +1,502 @@
-<style type="text/css">
-
-:root {
-  --bg:#1d1f25;
-  --card:#1d1f25;
-  --card-hover:#242845;
-  --text:#e7e9f0;
-  --muted:#a9adc1;
-  --accent:#4da3ff;
-  --border:rgba(255,255,255,0.08);
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Структура МВД</title>
+<style>
+body{
+  margin:0;
+  background:#1d1f25;
+  font-family: Inter, Arial, sans-serif;
+  color:#e7e9f0;
 }
-body { background-color: var(--bg); margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);}
-
-  
-.mv-wrapper {
-  --bg: #1d1f25;
-  --card: #1f2230;
-  --card-hover: #242845;
-  --text: #e7e9f0;
-  --muted: #a9adc1;
-  --accent: #4da3ff;
-  --border: rgba(255,255,255,0.08);
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--text);
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+.tree{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px;
+}
+.level{
+  display:flex;
+  gap:40px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:20px 0;
+}
+.line{
+  width:2px;
+  height:40px;
+  background:rgba(255,255,255,0.15);
+}
+.mv-card{
+  width:220px;
+  background:#1f2230;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+  overflow:hidden;
+  transition:.25s;
+  cursor: pointer;
+}
+.mv-card:hover{
+  transform:translateY(-5px);
+  background:#242845;
+  box-shadow:0 10px 25px rgba(0,0,0,0.5);
+}
+.mv-photo{
+  aspect-ratio:1/1;
+  background:#0c0f1f;
+}
+.mv-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.mv-content{
+  padding:14px;
+}
+.mv-name{
+  font-weight:600;
+  font-size:15px;
+}
+.mv-rank{
+  color:#a9adc1;
+  font-size:13px;
+  margin-top:4px;
+}
+.mv-position{
+  color:#4da3ff;
+  font-size:13px;
+  margin-top:6px;
+}
+h1{
+  text-align:center;
+  margin-top:30px;
 }
 
-.mv-wrapper * { box-sizing: border-box; }
-
-.mv-wrapper main { opacity: 0; transition: opacity 0.8s ease; }
-.mv-wrapper main.loaded { opacity: 1; }
-
-.mv-category { margin-top: 40px; }
-.mv-category h2 {
-  margin: 0 0 18px;
-  font-size: 22px;
-  border-left: 4px solid var(--accent);
-  padding-left: 10px;
-}
-
-.mv-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 18px;
-  align-items: start;
-}
-
-.mv-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow .25s ease, background .25s ease;
-}
-
-.mv-card.show { opacity: 1; transform: translateY(0); }
-
-.mv-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  background: var(--card-hover);
-}
-
-.mv-photo { aspect-ratio: 1 / 1; background: #0c0f1f; overflow: hidden; display: grid; place-items: center; }
-.mv-photo img { width: 100%; height: 100%; object-fit: cover; }
-
-.mv-content { padding: 14px; display: grid; gap: 4px; }
-.mv-name { font-weight: 600; }
-.mv-name a { color: var(--text); text-decoration: none; transition: .2s; }
-.mv-name a:hover { color: var(--accent); }
-
-.mv-rank { color: var(--muted); font-size: 14px; }
-
-.mv-fractions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.mv-fraction { display: inline-block; background: rgba(77,163,255,0.1); color: var(--accent); font-size: 12px; padding: 2px 6px; border-radius: 8px; white-space: nowrap; }
-
-.mv-details { background: #0f1220; border: 1px solid var(--border); border-radius: 12px; padding: 8px; }
-.mv-details summary { cursor: pointer; color: var(--accent); }
-
-.mv-awards { margin-top: 8px; display: grid; gap: 6px; font-size: 14px; }
-.mv-award { padding-left: 12px; position: relative; }
-.mv-award::before { content: "•"; position: absolute; left: 0; color: var(--accent); }
-
-#mv-loader { width: 100%; padding: 40px 0; display: flex; justify-content: center; }
-.mv-spinner { width: 60px; height: 60px; border: 6px solid rgba(77,163,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: mv-spin 1s linear infinite; }
-@keyframes mv-spin { to { transform: rotate(360deg); } }
-
-/* Поиск */
-.mv-search { margin-bottom: 30px; display: flex; justify-content: center; }
-.mv-search input {
+/* Модальное окно */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
   width: 100%;
-  max-width: 400px;
-  padding: 12px 20px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 30px;
-  color: var(--text);
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  position: relative;
+  background: #1f2230;
+  margin: 5% auto;
+  padding: 30px;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  animation: modalOpen 0.3s ease;
+}
+
+@keyframes modalOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-body {
+  display: flex;
+  gap: 30px;
+}
+
+.modal-photo {
+  flex: 0 0 250px;
+}
+
+.modal-photo img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+
+.modal-info {
+  flex: 1;
+}
+
+.modal-info h2 {
+  margin: 0 0 10px 0;
+  color: #fff;
+  font-size: 24px;
+}
+
+.modal-info .rank {
+  color: #4da3ff;
   font-size: 16px;
-  transition: all 0.3s ease;
-  outline: none;
-}
-.mv-search input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(77,163,255,0.2);
-}
-.mv-search input::placeholder { color: var(--muted); }
-
-.mv-card.hidden { display: none !important; }
-.mv-category.hidden { display: none !important; }
-.mv-no-results {
-  text-align: center;
-  padding: 40px;
-  color: var(--muted);
-  font-size: 18px;
-  background: var(--card);
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  margin-top: 20px;
+  margin-bottom: 15px;
 }
 
-.mv-content-container { position: relative; min-height: 200px; }
+.modal-info .position {
+  color: #a9adc1;
+  font-size: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-info .details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: baseline;
+}
+
+.detail-label {
+  color: #a9adc1;
+  width: 120px;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #fff;
+  font-size: 15px;
+}
+
+.close {
+  position: absolute;
+  right: 25px;
+  top: 15px;
+  color: #a9adc1;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close:hover {
+  color: #fff;
+}
+
+/* Дополнительная информация для карточек (скрыта, используется для модального окна) */
+.hidden-info {
+  display: none;
+}
 </style>
+</head>
+<body>
 
-<div class="mv-wrapper">
-  <div class="mv-search">
-    <input type="text" id="mv-search-input" placeholder="Поиск по нику..." autocomplete="off">
-  </div>
+<h1>Структура МВД</h1>
 
-  <div class="mv-content-container">
-    <div id="mv-loader"><div class="mv-spinner">&#8203;</div></div>
-    <main id="mv-container">&#8203;</main>
+<div class="tree">
+
+<!-- Министр -->
+<div class="level">
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://мвд.рф/upload/site1/minister1(2)-240xx314.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Колокольцев Владимир Александрович</div>
+<div class="mv-rank">Генерал полиции</div>
+<div class="mv-position">Министр внутренних дел РФ</div>
+</div>
+<!-- Скрытая дополнительная информация -->
+<div class="hidden-info">
+<div class="birth-date">27 мая 1961 года</div>
+<div class="birth-place">г. Нижний Ломов, Пензенская область</div>
+<div class="education">Высшее образование</div>
+<div class="awards">Герой Российской Федерации</div>
+<div class="phone">+7 (495) 667-80-00</div>
+<div class="email">minister@mvd.ru</div>
+</div>
+</div>
+</div>
+
+<div class="line"></div>
+
+<!-- Заместители -->
+<div class="level">
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/Khrapov_medium-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Храпов Андрей Иванович</div>
+<div class="mv-rank">Генерал-полковник полиции</div>
+<div class="mv-position">Первый заместитель Министра внутренних дел РФ</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">12 марта 1968 года</div>
+<div class="birth-place">г. Москва</div>
+<div class="education">Академия управления МВД России</div>
+<div class="awards">Орден Почета</div>
+<div class="phone">+7 (495) 667-81-00</div>
+<div class="email">a.khrapov@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/origin_Kravchenko-2025-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Кравченко Александр Николаевич</div>
+<div class="mv-rank">Генерал-полковник полиции</div>
+<div class="mv-position">Заместитель Министра внутренних дел РФ</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">5 июля 1965 года</div>
+<div class="birth-place">г. Санкт-Петербург</div>
+<div class="education">Санкт-Петербургский университет МВД</div>
+<div class="awards">Орден Мужества</div>
+<div class="phone">+7 (495) 667-82-00</div>
+<div class="email">a.kravchenko@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/otobr_vnutri_bio_CJ9R14541-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Кузнецов Дмитрий Сергеевич</div>
+<div class="mv-rank">Генерал-лейтенант полиции</div>
+<div class="mv-position">Заместитель Министра внутренних дел РФ</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">19 ноября 1972 года</div>
+<div class="birth-place">г. Екатеринбург</div>
+<div class="education">Уральский юридический институт МВД</div>
+<div class="awards">Медаль "За отличие в охране общественного порядка"</div>
+<div class="phone">+7 (495) 667-83-00</div>
+<div class="email">d.kuznetsov@mvd.ru</div>
+</div>
+</div>
+</div>
+
+<div class="line"></div>
+
+<!-- Начальники -->
+<div class="level">
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/433A1350foto-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Черников Михаил Юрьевич</div>
+<div class="mv-rank">Генерал-лейтенант полиции</div>
+<div class="mv-position">Начальник Главного управления по обеспечению безопасности дорожного движения</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">8 сентября 1969 года</div>
+<div class="birth-place">г. Воронеж</div>
+<div class="education">Воронежский государственный университет</div>
+<div class="awards">Заслуженный сотрудник органов внутренних дел</div>
+<div class="phone">+7 (495) 667-84-00</div>
+<div class="email">m.chernikov@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/otobr_vnutri_bio_CJ9R14541-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Габдурахманов Ленар Ринатович</div>
+<div class="mv-rank">Генерал-лейтенант полиции</div>
+<div class="mv-position">Начальник Главного управления по обеспечению охраны общественного порядка и координации взаимодействия с органами исполнительной власти субъектов Российской Федерации</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">23 апреля 1971 года</div>
+<div class="birth-place">г. Казань</div>
+<div class="education">Казанский юридический институт МВД</div>
+<div class="awards">Орден "За заслуги перед Отечеством" II степени</div>
+<div class="phone">+7 (495) 667-85-00</div>
+<div class="email">l.gabdurakhmanov@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/Percev-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Перцев Петр Николаевич</div>
+<div class="mv-rank">Генерал-майор полиции</div>
+<div class="mv-position">Начальник Главного управления по работе с личным составом</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">15 января 1975 года</div>
+<div class="birth-place">г. Новосибирск</div>
+<div class="education">Новосибирский военный институт</div>
+<div class="awards">Медаль "За боевое содружество"</div>
+<div class="phone">+7 (495) 667-86-00</div>
+<div class="email">p.pertsev@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/34rfDSC_63501-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Князев Александр Александрович</div>
+<div class="mv-rank">Генерал-майор внутренней службы</div>
+<div class="mv-position">Начальник Управления по взаимодействию с институтами гражданского общества и средствами массовой информации</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">3 июня 1978 года</div>
+<div class="birth-place">г. Краснодар</div>
+<div class="education">Кубанский государственный университет</div>
+<div class="awards">Благодарность Президента РФ</div>
+<div class="phone">+7 (495) 667-87-00</div>
+<div class="email">a.knyazev@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/Yurchin_A.A-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Юрчин Александр Александрович</div>
+<div class="mv-rank">Генерал-лейтенант внутренней службы</div>
+<div class="mv-position">Начальник Департамента по материально-техническому и медицинскому обеспечению</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">28 августа 1967 года</div>
+<div class="birth-place">г. Ростов-на-Дону</div>
+<div class="education">Ростовский государственный медицинский университет</div>
+<div class="awards">Заслуженный врач РФ</div>
+<div class="phone">+7 (495) 667-88-00</div>
+<div class="email">a.yurchin@mvd.ru</div>
+</div>
+</div>
+
+<div class="mv-card" onclick="openModal(this)">
+<div class="mv-photo">
+<img src="https://static.mvd.ru/upload/site1/document_manager/NAZARENKO_D.A-179xx229.jpg">
+</div>
+<div class="mv-content">
+<div class="mv-name">Назаренко Дмитрий Александрович</div>
+<div class="mv-rank">Генерал-лейтенант полиции</div>
+<div class="mv-position">Начальник Главного управления оперативного реагирования</div>
+</div>
+<div class="hidden-info">
+<div class="birth-date">11 декабря 1973 года</div>
+<div class="birth-place">г. Сочи</div>
+<div class="education">Краснодарский университет МВД</div>
+<div class="awards">Орден "За личное мужество"</div>
+<div class="phone">+7 (495) 667-89-00</div>
+<div class="email">d.nazarenko@mvd.ru</div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- Модальное окно -->
+<div id="personModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div id="modalBody" class="modal-body">
+      <!-- Контент будет заполняться через JavaScript -->
+    </div>
   </div>
 </div>
 
 <script>
-(function() {
-  const sheetID = "1Eovg6RgVQdh94T2eBuQ7KuWbCzjsJc9IeifSzvDsvaQ";
-  const sheetName = "База";
-  const url = `https://opensheet.elk.sh/${sheetID}/${encodeURIComponent(sheetName)}`;
+function openModal(card) {
+  const modal = document.getElementById('personModal');
+  const modalBody = document.getElementById('modalBody');
+  
+  // Получаем данные из карточки
+  const photo = card.querySelector('.mv-photo img').src;
+  const name = card.querySelector('.mv-name').textContent;
+  const rank = card.querySelector('.mv-rank').textContent;
+  const position = card.querySelector('.mv-position').textContent;
+  
+  // Получаем дополнительную информацию из скрытого блока
+  const hiddenInfo = card.querySelector('.hidden-info');
+  const birthDate = hiddenInfo.querySelector('.birth-date')?.textContent || 'Не указано';
+  const birthPlace = hiddenInfo.querySelector('.birth-place')?.textContent || 'Не указано';
+  const education = hiddenInfo.querySelector('.education')?.textContent || 'Не указано';
+  const awards = hiddenInfo.querySelector('.awards')?.textContent || 'Не указано';
+  const phone = hiddenInfo.querySelector('.phone')?.textContent || 'Не указано';
+  const email = hiddenInfo.querySelector('.email')?.textContent || 'Не указано';
+  
+  // Формируем содержимое модального окна
+  modalBody.innerHTML = `
+    <div class="modal-photo">
+      <img src="${photo}" alt="${name}">
+    </div>
+    <div class="modal-info">
+      <h2>${name}</h2>
+      <div class="rank">${rank}</div>
+      <div class="position">${position}</div>
+      <div class="details">
+        <div class="detail-item">
+          <span class="detail-label">Дата рождения:</span>
+          <span class="detail-value">${birthDate}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Место рождения:</span>
+          <span class="detail-value">${birthPlace}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Образование:</span>
+          <span class="detail-value">${education}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Награды:</span>
+          <span class="detail-value">${awards}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Телефон:</span>
+          <span class="detail-value">${phone}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email:</span>
+          <span class="detail-value">${email}</span>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  modal.style.display = 'block';
+}
 
-  const container = document.getElementById("mv-container");
-  const loader = document.getElementById("mv-loader");
-  const searchInput = document.getElementById("mv-search-input");
+function closeModal() {
+  document.getElementById('personModal').style.display = 'none';
+}
 
-  const allAwards = [
-    "герой республики провинция",
-    "медаль «за доблесть в службе»",
-    "медаль и. д. путилина",
-    "медаль «за смелость во имя спасения»",
-    "медаль «за заслуги в особых условиях»",
-    "медаль «за выслугу лет» i степени",
-    "медаль «за выслугу лет» ii степени",
-    "медаль «за выслугу лет» iii степени",
-    "медаль «за укрепление безопасности дорожного движения»",
-    "медаль «за вклад в укрепление правопорядка»"
-  ];
-
-  const braveAwards = [
-    "герой республики провинция",
-    "медаль «за смелость во имя спасения»"
-  ];
-
-  const rankCategories = [
-    { title: "Высший начальствующий состав органов внутренних дел, представленный к награде", ranks: ["генерал-полковник полиции","генерал-лейтенант полиции","генерал-майор полиции"] },
-    { title: "Старший начальствующий состав органов внутренних дел, представлен к награде", ranks: ["полковник полиции","подполковник полиции","майор полиции"] },
-    { title: "Средний начальствующий состав органов внутренних дел, представлен к награде", ranks: ["капитан полиции","старший лейтенант полиции","лейтенант полиции"] },
-    { title: "Младший начальствующий состав органов внутренних дел, представлен к награде", ranks: ["прапорщик полиции","старшина полиции","сержант полиции"] },
-    { title: "Рядовой состав органов внутренних дел, представлен к награде", ranks: ["рядовой полиции"] }
-  ];
-
-  function normalize(t) { return t ? t.toLowerCase().trim() : ""; }
-
-  function cleanAward(str) {
-    return str
-      .toLowerCase()
-      .replace(/["“”«»]/g, '')
-      .replace(/посмертно/g, '')
-      .trim();
+// Закрытие модального окна при клике вне его
+window.onclick = function(event) {
+  const modal = document.getElementById('personModal');
+  if (event.target == modal) {
+    modal.style.display = 'none';
   }
+}
 
-  fetch(url)
-    .then(res => res.json())
-    .then(data => { if (!Array.isArray(data)) throw new Error("Invalid data format"); render(data); })
-    .catch(err => {
-      console.error(err);
-      container.innerHTML = "<p style='color:red;text-align:center;'>Ошибка загрузки данных.</p>";
-      loader.style.display = "none";
-      container.classList.add("loaded");
-    });
-
-  function render(data) {
-    container.innerHTML = "";
-
-    const people = {};
-    data.forEach(row => {
-      const name = row.name;
-      if (!people[name]) {
-        people[name] = {
-          name: row.name,
-          rank: row.rank,
-          photo: row.photo,
-          forum_url: row.forum_url,
-          type: row.type,
-          fraction: row.fraction,
-          awards: []
-        };
-      }
-      if (row.award) {
-        const awards = row.award.split(";").map(a => a.trim()).filter(a => a);
-        people[name].awards.push(...awards);
-      }
-    });
-
-    const list = Object.values(people);
-    const used = new Set();
-
-    renderBrave(list, used);
-    renderRanks(list, used);
-    renderCivilians(list, used);
-
-    loader.style.display = "none";
-    container.classList.add("loaded");
-
-    const cards = container.querySelectorAll(".mv-card");
-    cards.forEach((card, index) => setTimeout(() => card.classList.add("show"), index * 60));
-
-    if (searchInput) {
-      searchInput.addEventListener("input", handleSearch);
-    }
+// Закрытие по клавише Escape
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeModal();
   }
-
-  function renderBrave(list, used) {
-    const brave = list.filter(p =>
-      p.type === "Сотрудник" &&
-      p.awards.some(a => braveAwards.some(b => cleanAward(a) === cleanAward(b))) &&
-      !used.has(p.name)
-    );
-
-    if (!brave.length) return;
-
-    const rankOrder = {
-      "генерал-полковник полиции": 1,
-      "генерал-лейтенант полиции": 2,
-      "генерал-майор полиции": 3,
-      "полковник полиции": 4,
-      "подполковник полиции": 5,
-      "майор полиции": 6,
-      "капитан полиции": 7,
-      "старший лейтенант полиции": 8,
-      "лейтенант полиции": 9,
-      "прапорщик полиции": 10,
-      "старшина полиции": 11,
-      "сержант полиции": 12,
-      "рядовой полиции": 13
-    };
-
-    brave.sort((a, b) => {
-      const rankA = rankOrder[normalize(a.rank)] || 999;
-      const rankB = rankOrder[normalize(b.rank)] || 999;
-      if (rankA !== rankB) return rankA - rankB;
-      return normalize(a.name).localeCompare(normalize(b.name), "ru");
-    });
-
-    brave.forEach(p => used.add(p.name));
-    createSection("Лица, награжденные за мужественный поступок, совершенный в условиях, сопряженных с риском для жизни", brave);
-  }
-
-  function renderRanks(list, used) {
-    rankCategories.forEach(cat => {
-      const normalizedCatRanks = cat.ranks.map(r => normalize(r));
-
-      let filtered = list.filter(p =>
-        p.type === "Сотрудник" &&
-        normalizedCatRanks.includes(normalize(p.rank)) &&
-        !used.has(p.name)
-      );
-
-      if (!filtered.length) return;
-
-      filtered.sort((a, b) => {
-        const rankA = normalizedCatRanks.indexOf(normalize(a.rank));
-        const rankB = normalizedCatRanks.indexOf(normalize(b.rank));
-        if (rankA !== rankB) return rankA - rankB;
-        return normalize(a.name).localeCompare(normalize(b.name), "ru");
-      });
-
-      filtered.forEach(p => used.add(p.name));
-      createSection(cat.title, filtered);
-    });
-  }
-
-  function renderCivilians(list, used) {
-    const civ = list.filter(p => p.type === "Гражданский" && !used.has(p.name));
-    if (!civ.length) return;
-
-    civ.sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), "ru"));
-    civ.forEach(p => used.add(p.name));
-    createSection("Гражданские и иные лица, представленные к награде органов внутренних дел", civ);
-  }
-
-  function createSection(title, employees) {
-    const section = document.createElement("section");
-    section.className = "mv-category";
-
-    const h2 = document.createElement("h2");
-    h2.textContent = title;
-    section.appendChild(h2);
-
-    const grid = document.createElement("div");
-    grid.className = "mv-grid";
-    section.appendChild(grid);
-
-    employees.forEach(person => grid.appendChild(createCard(person)));
-    container.appendChild(section);
-  }
-
-  function createCard(person) {
-    const card = document.createElement("article");
-    card.className = "mv-card";
-
-    const photoDiv = document.createElement("div");
-    photoDiv.className = "mv-photo";
-    if (person.photo) {
-      const img = document.createElement("img");
-      img.src = person.photo;
-      img.alt = person.name || "";
-      photoDiv.appendChild(img);
-    } else {
-      photoDiv.textContent = "Нет фото";
-    }
-
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "mv-content";
-
-    const nameDiv = document.createElement("div");
-    nameDiv.className = "mv-name";
-    if (person.forum_url) {
-      const a = document.createElement("a");
-      a.href = person.forum_url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.textContent = person.name || "";
-      nameDiv.appendChild(a);
-    } else {
-      nameDiv.textContent = person.name || "";
-    }
-
-    const rankDiv = document.createElement("div");
-    rankDiv.className = "mv-rank";
-    rankDiv.textContent = person.rank || "";
-
-    const fractionsWrapper = document.createElement("div");
-    fractionsWrapper.className = "mv-fractions";
-    if (person.fraction) {
-      person.fraction.split(";").map(f => f.trim()).forEach(f => {
-        const badge = document.createElement("div");
-        badge.className = "mv-fraction";
-        badge.textContent = f;
-        fractionsWrapper.appendChild(badge);
-      });
-    }
-
-    const details = document.createElement("details");
-    details.className = "mv-details";
-    const summary = document.createElement("summary");
-    summary.textContent = "Награды";
-    details.appendChild(summary);
-
-    const awardsDiv = document.createElement("div");
-    awardsDiv.className = "mv-awards";
-
-    person.awards.sort((a, b) => {
-      const idxA = allAwards.indexOf(a);
-      const idxB = allAwards.indexOf(b);
-      return idxA - idxB;
-    });
-
-    person.awards.forEach(a => {
-      const award = document.createElement("div");
-      award.className = "mv-award";
-      award.textContent = a;
-      awardsDiv.appendChild(award);
-    });
-
-    details.appendChild(awardsDiv);
-
-    contentDiv.appendChild(nameDiv);
-    contentDiv.appendChild(rankDiv);
-    contentDiv.appendChild(fractionsWrapper);
-    contentDiv.appendChild(details);
-
-    card.appendChild(photoDiv);
-    card.appendChild(contentDiv);
-
-    return card;
-  }
-
-  function handleSearch() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-
-    const oldMsg = document.getElementById("mv-no-results-message");
-    if (oldMsg) oldMsg.remove();
-
-    const cards = document.querySelectorAll(".mv-card");
-    const sections = document.querySelectorAll(".mv-category");
-
-    if (searchTerm === "") {
-      cards.forEach(c => c.classList.remove("hidden"));
-      sections.forEach(s => s.classList.remove("hidden"));
-      return;
-    }
-
-    let visibleCount = 0;
-
-    cards.forEach(card => {
-      const nameElement = card.querySelector(".mv-name");
-      if (nameElement) {
-        const name = nameElement.textContent.toLowerCase();
-        if (name.includes(searchTerm)) {
-          card.classList.remove("hidden");
-          visibleCount++;
-        } else {
-          card.classList.add("hidden");
-        }
-      }
-    });
-
-    sections.forEach(section => {
-      const visibleCards = section.querySelectorAll(".mv-card:not(.hidden)");
-      if (visibleCards.length === 0) {
-        section.classList.add("hidden");
-      } else {
-        section.classList.remove("hidden");
-      }
-    });
-
-    if (visibleCount === 0) {
-      const noResultsMsg = document.createElement("div");
-      noResultsMsg.id = "mv-no-results-message";
-      noResultsMsg.className = "mv-no-results";
-      noResultsMsg.textContent = `По запросу «${searchTerm}» ничего не найдено`;
-      container.appendChild(noResultsMsg);
-    }
-  }
-})();
+});
 </script>
+
+</body>
+</html>
