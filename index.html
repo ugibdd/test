@@ -1,502 +1,840 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Структура МВД</title>
-<style>
-body{
-  margin:0;
-  background:#1d1f25;
-  font-family: Inter, Arial, sans-serif;
-  color:#e7e9f0;
-}
-.tree{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:40px;
-}
-.level{
-  display:flex;
-  gap:40px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:20px 0;
-}
-.line{
-  width:2px;
-  height:40px;
-  background:rgba(255,255,255,0.15);
-}
-.mv-card{
-  width:220px;
-  background:#1f2230;
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:18px;
-  overflow:hidden;
-  transition:.25s;
-  cursor: pointer;
-}
-.mv-card:hover{
-  transform:translateY(-5px);
-  background:#242845;
-  box-shadow:0 10px 25px rgba(0,0,0,0.5);
-}
-.mv-photo{
-  aspect-ratio:1/1;
-  background:#0c0f1f;
-}
-.mv-photo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.mv-content{
-  padding:14px;
-}
-.mv-name{
-  font-weight:600;
-  font-size:15px;
-}
-.mv-rank{
-  color:#a9adc1;
-  font-size:13px;
-  margin-top:4px;
-}
-.mv-position{
-  color:#4da3ff;
-  font-size:13px;
-  margin-top:6px;
-}
-h1{
-  text-align:center;
-  margin-top:30px;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Структура | УГИБДД (исправленные линии при масштабе)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* Модальное окно */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.8);
-  backdrop-filter: blur(5px);
-}
+    body {
+      margin: 0;
+      background: #1d1f25;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      color: #e7e9f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
 
-.modal-content {
-  position: relative;
-  background: #1f2230;
-  margin: 5% auto;
-  padding: 30px;
-  width: 80%;
-  max-width: 800px;
-  border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-  animation: modalOpen 0.3s ease;
-}
+    .tree-responsive-container {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: visible;
+      background: #1d1f25;
+      position: relative;
+      min-height: 100vh;
+    }
 
-@keyframes modalOpen {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    .tree-scaler {
+      transform-origin: top left;
+      transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      width: max-content;
+      min-width: 100%;
+    }
 
-.modal-body {
-  display: flex;
-  gap: 30px;
-}
+    .tree-workspace {
+      position: relative;
+      display: inline-block;
+      min-width: 100%;
+      width: max-content;
+    }
 
-.modal-photo {
-  flex: 0 0 250px;
-}
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      padding: 20px 40px;
+    }
 
-.modal-photo img {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 16px;
-  border: 2px solid rgba(255,255,255,0.1);
-}
+    .svg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
 
-.modal-info {
-  flex: 1;
-}
+    .svg-layer svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
 
-.modal-info h2 {
-  margin: 0 0 10px 0;
-  color: #fff;
-  font-size: 24px;
-}
+    .level {
+      display: flex;
+      gap: 60px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 70px 0 40px 0;
+    }
 
-.modal-info .rank {
-  color: #4da3ff;
-  font-size: 16px;
-  margin-bottom: 15px;
-}
+    .tree-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
 
-.modal-info .position {
-  color: #a9adc1;
-  font-size: 15px;
-  margin-bottom: 25px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
+    .node-card {
+      width: 260px;
+      background: #1f2230;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: 0.25s;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      position: relative;
+    }
 
-.modal-info .details {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+    .node-card:hover {
+      transform: translateY(-5px);
+      background: #2a2e40;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.5);
+      border-color: rgba(255,255,255,0.2);
+    }
 
-.detail-item {
-  display: flex;
-  align-items: baseline;
-}
+    .card-photo {
+      aspect-ratio: 1/1;
+      background: #0c0f1f;
+      overflow: hidden;
+    }
 
-.detail-label {
-  color: #a9adc1;
-  width: 120px;
-  font-size: 14px;
-}
+    .card-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
-.detail-value {
-  color: #fff;
-  font-size: 15px;
-}
+    .card-content {
+      padding: 16px 14px;
+    }
 
-.close {
-  position: absolute;
-  right: 25px;
-  top: 15px;
-  color: #a9adc1;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: color 0.2s;
-}
+    .card-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #ffffff;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
 
-.close:hover {
-  color: #fff;
-}
+    .card-field {
+      color: #cbd5e6;
+      font-size: 13px;
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
 
-/* Дополнительная информация для карточек (скрыта, используется для модального окна) */
-.hidden-info {
-  display: none;
-}
-</style>
+    .card-field.highlight {
+      color: #6bb5ff;
+      font-weight: 500;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 80px;
+      font-size: 1.2rem;
+      color: #a9adc1;
+      width: 100%;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-box {
+      background: #3b0a0a;
+      color: #fecaca;
+      padding: 24px;
+      border-radius: 18px;
+      margin: 25px;
+      font-weight: 500;
+      border: 1px solid rgba(255,100,100,0.2);
+      width: 100%;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-content {
+      position: relative;
+      background: #1f2230;
+      margin: 5% auto;
+      padding: 30px;
+      width: 85%;
+      max-width: 850px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      animation: modalOpen 0.3s ease;
+    }
+
+    @keyframes modalOpen {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-body {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .modal-photo {
+      flex: 0 0 240px;
+    }
+
+    .modal-photo img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+
+    .modal-info {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .modal-info h2 {
+      margin: 0 0 12px 0;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .modal-info .detail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .detail-label {
+      color: #9ca3af;
+      width: 140px;
+      font-size: 14px;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    .detail-value {
+      color: #f0f3fa;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .close {
+      position: absolute;
+      right: 28px;
+      top: 18px;
+      color: #a9adc1;
+      font-size: 32px;
+      font-weight: normal;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .close:hover { color: #ffffff; }
+
+    .tree-responsive-container {
+      scrollbar-width: thin;
+    }
+  </style>
 </head>
 <body>
-
-<h1>Структура МВД</h1>
-
-<div class="tree">
-
-<!-- Министр -->
-<div class="level">
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://мвд.рф/upload/site1/minister1(2)-240xx314.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Колокольцев Владимир Александрович</div>
-<div class="mv-rank">Генерал полиции</div>
-<div class="mv-position">Министр внутренних дел РФ</div>
-</div>
-<!-- Скрытая дополнительная информация -->
-<div class="hidden-info">
-<div class="birth-date">27 мая 1961 года</div>
-<div class="birth-place">г. Нижний Ломов, Пензенская область</div>
-<div class="education">Высшее образование</div>
-<div class="awards">Герой Российской Федерации</div>
-<div class="phone">+7 (495) 667-80-00</div>
-<div class="email">minister@mvd.ru</div>
-</div>
-</div>
+<div id="adaptiveTreeRoot" class="tree-responsive-container">
+  <div class="loading-spinner"><div class="spinner"></div>Загрузка структуры...</div>
 </div>
 
-<div class="line"></div>
-
-<!-- Заместители -->
-<div class="level">
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/Khrapov_medium-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Храпов Андрей Иванович</div>
-<div class="mv-rank">Генерал-полковник полиции</div>
-<div class="mv-position">Первый заместитель Министра внутренних дел РФ</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">12 марта 1968 года</div>
-<div class="birth-place">г. Москва</div>
-<div class="education">Академия управления МВД России</div>
-<div class="awards">Орден Почета</div>
-<div class="phone">+7 (495) 667-81-00</div>
-<div class="email">a.khrapov@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/origin_Kravchenko-2025-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Кравченко Александр Николаевич</div>
-<div class="mv-rank">Генерал-полковник полиции</div>
-<div class="mv-position">Заместитель Министра внутренних дел РФ</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">5 июля 1965 года</div>
-<div class="birth-place">г. Санкт-Петербург</div>
-<div class="education">Санкт-Петербургский университет МВД</div>
-<div class="awards">Орден Мужества</div>
-<div class="phone">+7 (495) 667-82-00</div>
-<div class="email">a.kravchenko@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/otobr_vnutri_bio_CJ9R14541-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Кузнецов Дмитрий Сергеевич</div>
-<div class="mv-rank">Генерал-лейтенант полиции</div>
-<div class="mv-position">Заместитель Министра внутренних дел РФ</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">19 ноября 1972 года</div>
-<div class="birth-place">г. Екатеринбург</div>
-<div class="education">Уральский юридический институт МВД</div>
-<div class="awards">Медаль "За отличие в охране общественного порядка"</div>
-<div class="phone">+7 (495) 667-83-00</div>
-<div class="email">d.kuznetsov@mvd.ru</div>
-</div>
-</div>
-</div>
-
-<div class="line"></div>
-
-<!-- Начальники -->
-<div class="level">
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/433A1350foto-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Черников Михаил Юрьевич</div>
-<div class="mv-rank">Генерал-лейтенант полиции</div>
-<div class="mv-position">Начальник Главного управления по обеспечению безопасности дорожного движения</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">8 сентября 1969 года</div>
-<div class="birth-place">г. Воронеж</div>
-<div class="education">Воронежский государственный университет</div>
-<div class="awards">Заслуженный сотрудник органов внутренних дел</div>
-<div class="phone">+7 (495) 667-84-00</div>
-<div class="email">m.chernikov@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/otobr_vnutri_bio_CJ9R14541-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Габдурахманов Ленар Ринатович</div>
-<div class="mv-rank">Генерал-лейтенант полиции</div>
-<div class="mv-position">Начальник Главного управления по обеспечению охраны общественного порядка и координации взаимодействия с органами исполнительной власти субъектов Российской Федерации</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">23 апреля 1971 года</div>
-<div class="birth-place">г. Казань</div>
-<div class="education">Казанский юридический институт МВД</div>
-<div class="awards">Орден "За заслуги перед Отечеством" II степени</div>
-<div class="phone">+7 (495) 667-85-00</div>
-<div class="email">l.gabdurakhmanov@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/Percev-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Перцев Петр Николаевич</div>
-<div class="mv-rank">Генерал-майор полиции</div>
-<div class="mv-position">Начальник Главного управления по работе с личным составом</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">15 января 1975 года</div>
-<div class="birth-place">г. Новосибирск</div>
-<div class="education">Новосибирский военный институт</div>
-<div class="awards">Медаль "За боевое содружество"</div>
-<div class="phone">+7 (495) 667-86-00</div>
-<div class="email">p.pertsev@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/34rfDSC_63501-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Князев Александр Александрович</div>
-<div class="mv-rank">Генерал-майор внутренней службы</div>
-<div class="mv-position">Начальник Управления по взаимодействию с институтами гражданского общества и средствами массовой информации</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">3 июня 1978 года</div>
-<div class="birth-place">г. Краснодар</div>
-<div class="education">Кубанский государственный университет</div>
-<div class="awards">Благодарность Президента РФ</div>
-<div class="phone">+7 (495) 667-87-00</div>
-<div class="email">a.knyazev@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/Yurchin_A.A-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Юрчин Александр Александрович</div>
-<div class="mv-rank">Генерал-лейтенант внутренней службы</div>
-<div class="mv-position">Начальник Департамента по материально-техническому и медицинскому обеспечению</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">28 августа 1967 года</div>
-<div class="birth-place">г. Ростов-на-Дону</div>
-<div class="education">Ростовский государственный медицинский университет</div>
-<div class="awards">Заслуженный врач РФ</div>
-<div class="phone">+7 (495) 667-88-00</div>
-<div class="email">a.yurchin@mvd.ru</div>
-</div>
-</div>
-
-<div class="mv-card" onclick="openModal(this)">
-<div class="mv-photo">
-<img src="https://static.mvd.ru/upload/site1/document_manager/NAZARENKO_D.A-179xx229.jpg">
-</div>
-<div class="mv-content">
-<div class="mv-name">Назаренко Дмитрий Александрович</div>
-<div class="mv-rank">Генерал-лейтенант полиции</div>
-<div class="mv-position">Начальник Главного управления оперативного реагирования</div>
-</div>
-<div class="hidden-info">
-<div class="birth-date">11 декабря 1973 года</div>
-<div class="birth-place">г. Сочи</div>
-<div class="education">Краснодарский университет МВД</div>
-<div class="awards">Орден "За личное мужество"</div>
-<div class="phone">+7 (495) 667-89-00</div>
-<div class="email">d.nazarenko@mvd.ru</div>
-</div>
-</div>
-
-</div>
-
-</div>
-
-<!-- Модальное окно -->
 <div id="personModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
-    <div id="modalBody" class="modal-body">
-      <!-- Контент будет заполняться через JavaScript -->
-    </div>
+    <div id="modalBody" class="modal-body"></div>
   </div>
 </div>
 
 <script>
-function openModal(card) {
-  const modal = document.getElementById('personModal');
-  const modalBody = document.getElementById('modalBody');
-  
-  // Получаем данные из карточки
-  const photo = card.querySelector('.mv-photo img').src;
-  const name = card.querySelector('.mv-name').textContent;
-  const rank = card.querySelector('.mv-rank').textContent;
-  const position = card.querySelector('.mv-position').textContent;
-  
-  // Получаем дополнительную информацию из скрытого блока
-  const hiddenInfo = card.querySelector('.hidden-info');
-  const birthDate = hiddenInfo.querySelector('.birth-date')?.textContent || 'Не указано';
-  const birthPlace = hiddenInfo.querySelector('.birth-place')?.textContent || 'Не указано';
-  const education = hiddenInfo.querySelector('.education')?.textContent || 'Не указано';
-  const awards = hiddenInfo.querySelector('.awards')?.textContent || 'Не указано';
-  const phone = hiddenInfo.querySelector('.phone')?.textContent || 'Не указано';
-  const email = hiddenInfo.querySelector('.email')?.textContent || 'Не указано';
-  
-  // Формируем содержимое модального окна
-  modalBody.innerHTML = `
-    <div class="modal-photo">
-      <img src="${photo}" alt="${name}">
-    </div>
-    <div class="modal-info">
-      <h2>${name}</h2>
-      <div class="rank">${rank}</div>
-      <div class="position">${position}</div>
-      <div class="details">
-        <div class="detail-item">
-          <span class="detail-label">Дата рождения:</span>
-          <span class="detail-value">${birthDate}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Место рождения:</span>
-          <span class="detail-value">${birthPlace}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Образование:</span>
-          <span class="detail-value">${education}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Награды:</span>
-          <span class="detail-value">${awards}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Телефон:</span>
-          <span class="detail-value">${phone}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Email:</span>
-          <span class="detail-value">${email}</span>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  modal.style.display = 'block';
-}
+  (function() {
+    const SHEET_ID = "1RIOPsWcF3oBi8K5-4rvgjK6AHY4TCP-nmqvCFPNhwbM";
+    const SHEET_NAME = "Лист1";
+    const DATA_URL = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(SHEET_NAME)}`;
 
-function closeModal() {
-  document.getElementById('personModal').style.display = 'none';
-}
+    const CARD_FIELDS = [
+      { key: 'name', label: null, bold: true, white: true },
+      { key: 'rank', label: null, bold: false },
+      { key: 'title', label: null, bold: false, highlight: true }
+    ];
 
-// Закрытие модального окна при клике вне его
-window.onclick = function(event) {
-  const modal = document.getElementById('personModal');
-  if (event.target == modal) {
-    modal.style.display = 'none';
-  }
-}
+    const PHOTO_FIELD = 'photo';
+    const MODAL_FIELDS = [
+      { key: 'rank', label: 'Звание' },
+      { key: 'title', label: 'Должность' },
+      { key: 'department', label: 'Подразделение / отдел' },
+      { key: 'birth_date', label: 'Дата рождения' },
+      { key: 'birth_place', label: 'Место рождения' },
+      { key: 'education', label: 'Образование' },
+      { key: 'awards', label: 'Награды' },
+      { key: 'phone', label: 'Телефон' },
+      { key: 'email', label: 'Email' },
+    ];
 
-// Закрытие по клавише Escape
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape') {
-    closeModal();
-  }
-});
+    const LINE_COLOR = '#535459';
+    const LINE_WIDTH = 2;
+    const VERTICAL_OFFSET = 12; // отступ от карточки до начала линии
+
+    let nodeElementRegistry = new Map();
+    let currentDrawTimeout = null;
+    let resizeObserver = null;
+    let isDrawing = false;
+    let currentScale = 1;
+    let animationFrameRequest = null;
+
+    const DEFAULT_PHOTO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%230c0f1f'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%23374151'/%3E%3Cellipse cx='100' cy='190' rx='70' ry='50' fill='%23374151'/%3E%3C/svg%3E";
+
+    function sanitizeId(str) {
+      return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
+    async function loadSheetData() {
+      const response = await fetch(DATA_URL);
+      if (!response.ok) throw new Error(`Ошибка HTTP ${response.status}`);
+      const json = await response.json();
+      if (!Array.isArray(json) || json.length === 0) throw new Error("Таблица не содержит данных");
+      return json;
+    }
+
+    function buildHierarchy(rows) {
+      const map = new Map();
+      const roots = [];
+
+      rows.forEach((row, idx) => {
+        const id = row.id || row.ID || `auto_${idx}`;
+        const name = row.name || row.Name || row.название || row.title || row.fullname || 'Сотрудник';
+        const parentId = row.parent_id || row.parentId || row.parent || '';
+
+        const nodeData = { ...row, id, name, parentId: parentId || null, children: [], _order: idx };
+        map.set(id, nodeData);
+      });
+
+      map.forEach(node => {
+        if (node.parentId && map.has(node.parentId)) {
+          const parent = map.get(node.parentId);
+          if (parent && !parent.children.some(child => child.id === node.id)) {
+            parent.children.push(node);
+          }
+        } else if (!node.parentId || node.parentId === '' || !map.has(node.parentId)) {
+          if (!roots.some(r => r.id === node.id)) roots.push(node);
+        }
+      });
+
+      const preserveOrder = (node) => {
+        if (node.children && node.children.length) {
+          node.children.sort((a, b) => {
+            const orderA = a._order !== undefined ? a._order : 0;
+            const orderB = b._order !== undefined ? b._order : 0;
+            return orderA - orderB;
+          });
+          node.children.forEach(preserveOrder);
+        }
+      };
+      
+      roots.forEach(preserveOrder);
+
+      if (roots.length === 0) return null;
+      if (roots.length === 1) return roots[0];
+
+      return {
+        id: "org_root",
+        name: "Организация",
+        parentId: null,
+        children: roots,
+        isVirtual: true,
+        _order: -1
+      };
+    }
+
+    function getFieldValue(node, fieldKey) {
+      if (!node) return '';
+      if (node[fieldKey] !== undefined && node[fieldKey] !== null) return node[fieldKey];
+      const lowerKey = fieldKey.toLowerCase();
+      for (const key of Object.keys(node)) {
+        if (key.toLowerCase() === lowerKey || key.toLowerCase().replace(/_/g, '') === lowerKey.replace(/_/g, '')) {
+          return node[key];
+        }
+      }
+      return '';
+    }
+
+    function renderNode(node, container, domPath = '') {
+      if (!node) return null;
+
+      const nodeDomId = sanitizeId(`${domPath}_${node.id}`);
+      const nodeDiv = document.createElement('div');
+      nodeDiv.className = 'tree-node';
+      nodeDiv.setAttribute('data-dom-id', nodeDomId);
+      nodeDiv.setAttribute('data-node-id', node.id);
+
+      const card = document.createElement('div');
+      card.className = 'node-card';
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openModal(node);
+      });
+
+      const photoUrl = getFieldValue(node, PHOTO_FIELD) || DEFAULT_PHOTO;
+      const photoDiv = document.createElement('div');
+      photoDiv.className = 'card-photo';
+      const img = document.createElement('img');
+      img.src = photoUrl;
+      img.alt = node.name || '';
+      img.onerror = function() { this.src = DEFAULT_PHOTO; };
+      photoDiv.appendChild(img);
+
+      const content = document.createElement('div');
+      content.className = 'card-content';
+
+      CARD_FIELDS.forEach(fieldDef => {
+        let value = getFieldValue(node, fieldDef.key);
+        if (!value && !fieldDef.bold) return;
+        if (!value && fieldDef.bold && fieldDef.key === 'name') {
+          value = node.name || 'Без имени';
+        }
+        if (!value) return;
+
+        const el = document.createElement('div');
+        el.className = 'card-field';
+        if (fieldDef.bold) el.classList.add('card-name');
+        if (fieldDef.highlight) el.classList.add('highlight');
+        if (fieldDef.white) el.style.color = '#ffffff';
+        el.textContent = fieldDef.label ? `${fieldDef.label}: ${value}` : value;
+        content.appendChild(el);
+      });
+
+      card.appendChild(photoDiv);
+      card.appendChild(content);
+      nodeDiv.appendChild(card);
+
+      if (node.children && node.children.length) {
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'level';
+        levelDiv.setAttribute('data-parent-dom-id', nodeDomId);
+        node.children.forEach((child, idx) => {
+          const childEl = renderNode(child, levelDiv, `${domPath}_${idx}`);
+          if (childEl) levelDiv.appendChild(childEl);
+        });
+        nodeDiv.appendChild(levelDiv);
+      }
+
+      container.appendChild(nodeDiv);
+      nodeElementRegistry.set(nodeDomId, {
+        element: nodeDiv,
+        node: node,
+      });
+
+      return nodeDiv;
+    }
+
+    // Получение текущего масштаба из transform
+    function getCurrentScale() {
+      const scaler = document.querySelector('.tree-scaler');
+      if (!scaler) return 1;
+      const transform = scaler.style.transform;
+      if (transform && transform.includes('scale(')) {
+        const match = transform.match(/scale\(([\d.]+)\)/);
+        if (match && match[1]) {
+          return parseFloat(match[1]);
+        }
+      }
+      return 1;
+    }
+
+    // Главная функция отрисовки линий — полностью переработана для корректной работы при любом масштабе
+    function drawAllConnections() {
+      const workspace = document.querySelector('.tree-workspace');
+      if (!workspace) return;
+      
+      if (isDrawing) return;
+      isDrawing = true;
+
+      try {
+        // Удаляем старый слой
+        const oldLayer = workspace.querySelector('.svg-layer');
+        if (oldLayer) oldLayer.remove();
+
+        const currentScaleVal = getCurrentScale();
+        
+        // Получаем абсолютную позицию workspace в окне
+        const workspaceRect = workspace.getBoundingClientRect();
+        if (workspaceRect.width === 0 || workspaceRect.height === 0) {
+          isDrawing = false;
+          return;
+        }
+
+        // Создаём новый SVG слой
+        const layer = document.createElement('div');
+        layer.className = 'svg-layer';
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        layer.appendChild(svg);
+        workspace.appendChild(layer);
+
+        // Сначала определим размеры SVG — они должны быть в "логических" координатах (с учётом масштаба 1)
+        // чтобы линии не обрезались. Для этого найдём максимальные координаты всех элементов.
+        let maxX = 0, maxY = 0;
+        
+        // Собираем все пути
+        const pathsData = [];
+        
+        for (const [domId, entry] of nodeElementRegistry.entries()) {
+          const node = entry.node;
+          const childElement = entry.element;
+          if (!childElement || !node || node.isVirtual) continue;
+
+          // Находим родителя
+          let parentDomId = null;
+          for (const [pId, pEntry] of nodeElementRegistry.entries()) {
+            if (pEntry.node.id === node.parentId) {
+              parentDomId = pId;
+              break;
+            }
+          }
+          if (!parentDomId) continue;
+          
+          const parentEntry = nodeElementRegistry.get(parentDomId);
+          if (!parentEntry || !parentEntry.element) continue;
+
+          const parentElement = parentEntry.element;
+          const parentCard = parentElement.querySelector('.node-card');
+          const childCard = childElement.querySelector('.node-card');
+          if (!parentCard || !childCard) continue;
+
+          // Получаем координаты карточек относительно viewport
+          const parentRect = parentCard.getBoundingClientRect();
+          const childRect = childCard.getBoundingClientRect();
+
+          if (parentRect.width === 0 || parentRect.height === 0 || childRect.width === 0 || childRect.height === 0) {
+            continue;
+          }
+
+          // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ:
+          // Преобразуем координаты из пространства viewport в пространство workspace
+          // с учётом текущего масштаба. Так как workspace масштабируется через transform,
+          // его внутренняя система координат "растянута". SVG рисуется поверх workspace
+          // в его внутренней системе координат (где 1px = 1px без учёта scale).
+          // Поэтому координаты из getBoundingClientRect нужно "сжать" обратно, разделив на масштаб.
+          
+          // Вычисляем центр низа родительской карточки и центр верха дочерней
+          // в координатах workspace (без учёта визуального масштаба)
+          const startX = (parentRect.left + parentRect.width / 2 - workspaceRect.left) / currentScaleVal;
+          const startY = (parentRect.bottom - workspaceRect.top + VERTICAL_OFFSET) / currentScaleVal;
+          const endX = (childRect.left + childRect.width / 2 - workspaceRect.left) / currentScaleVal;
+          const endY = (childRect.top - workspaceRect.top - VERTICAL_OFFSET) / currentScaleVal;
+
+          // Только если дочерний элемент ниже родительского
+          if (startY >= endY) continue;
+
+          // Вычисляем промежуточную точку (горизонтальный отрезок)
+          // Вертикальное расстояние между карточками
+          const verticalDistance = endY - startY;
+          // Горизонтальный изгиб будет на середине вертикального расстояния
+          const midY = startY + verticalDistance / 2;
+          
+          // Формируем путь с одним изгибом (простой и надёжный)
+          // Идём вниз от родителя до середины, затем горизонтально, затем вниз к ребёнку
+          const d = `M ${startX} ${startY} L ${startX} ${midY} L ${endX} ${midY} L ${endX} ${endY}`;
+          
+          pathsData.push(d);
+          
+          // Обновляем максимальные координаты для установки размера SVG
+          maxX = Math.max(maxX, startX, endX);
+          maxY = Math.max(maxY, startY, endY, midY);
+        }
+        
+        // Отрисовываем все пути
+        for (const d of pathsData) {
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", d);
+          path.setAttribute("stroke", LINE_COLOR);
+          path.setAttribute("stroke-width", LINE_WIDTH);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke-linejoin", "round");
+          path.setAttribute("stroke-linecap", "round");
+          svg.appendChild(path);
+        }
+        
+        // Устанавливаем размеры SVG с запасом, чтобы линии точно не обрезались
+        // Добавляем отступы по 100px с каждой стороны
+        const svgWidth = maxX + 200;
+        const svgHeight = maxY + 100;
+        
+        svg.setAttribute('width', svgWidth);
+        svg.setAttribute('height', svgHeight);
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.minWidth = '100%';
+        svg.style.minHeight = '100%';
+        
+        // Также устанавливаем размеры слоя, чтобы он покрывал всю область
+        layer.style.width = '100%';
+        layer.style.height = '100%';
+        
+      } catch (e) {
+        console.warn("Ошибка при отрисовке линий:", e);
+      } finally {
+        isDrawing = false;
+      }
+    }
+
+    // Автоматическое масштабирование по ширине
+    function applyAutoScale() {
+      if (!window.autoScaleEnabled) return;
+      
+      const rootContainer = document.getElementById('adaptiveTreeRoot');
+      const scaler = document.querySelector('.tree-scaler');
+      const workspace = document.querySelector('.tree-workspace');
+      
+      if (!rootContainer || !scaler || !workspace) return;
+      
+      const containerRect = rootContainer.getBoundingClientRect();
+      // Получаем реальную ширину контента без масштабирования
+      const contentWidth = workspace.scrollWidth;
+      
+      if (containerRect.width <= 0 || contentWidth <= 0) return;
+      
+      let neededScale = containerRect.width / contentWidth;
+      // Ограничиваем масштаб: от 0.45 до 1
+      neededScale = Math.min(1, Math.max(0.45, neededScale));
+      
+      // Если масштаб изменился — применяем
+      if (Math.abs(neededScale - currentScale) > 0.005) {
+        currentScale = neededScale;
+        scaler.style.transform = `scale(${currentScale})`;
+        // После изменения масштаба обязательно перерисовываем линии
+        scheduleDraw();
+      }
+      
+      // Фиксируем ширину scaler для корректного позиционирования
+      scaler.style.width = `${contentWidth}px`;
+    }
+
+    function scheduleScaleUpdate() {
+      if (animationFrameRequest) cancelAnimationFrame(animationFrameRequest);
+      animationFrameRequest = requestAnimationFrame(() => {
+        applyAutoScale();
+        animationFrameRequest = null;
+      });
+    }
+
+    function scheduleDraw() {
+      if (currentDrawTimeout) clearTimeout(currentDrawTimeout);
+      currentDrawTimeout = setTimeout(() => {
+        drawAllConnections();
+        currentDrawTimeout = null;
+      }, 60);
+    }
+    
+    function immediateDraw() {
+      if (currentDrawTimeout) {
+        clearTimeout(currentDrawTimeout);
+        currentDrawTimeout = null;
+      }
+      drawAllConnections();
+    }
+
+    function openModal(node) {
+      const modal = document.getElementById('personModal');
+      const modalBody = document.getElementById('modalBody');
+      const photoUrl = getFieldValue(node, PHOTO_FIELD) || DEFAULT_PHOTO;
+      const name = node.name || 'Сотрудник';
+
+      let detailsHTML = '';
+      MODAL_FIELDS.forEach(fieldDef => {
+        const value = getFieldValue(node, fieldDef.key);
+        if (value && value.toString().trim() !== '') {
+          detailsHTML += `
+            <div class="detail-item">
+              <span class="detail-label">${escapeHtml(fieldDef.label)}:</span>
+              <span class="detail-value">${escapeHtml(value)}</span>
+            </div>
+          `;
+        }
+      });
+
+      modalBody.innerHTML = `
+        <div class="modal-photo">
+          <img src="${photoUrl}" alt="${escapeHtml(name)}" onerror="this.src='${DEFAULT_PHOTO}'">
+        </div>
+        <div class="modal-info">
+          <h2>${escapeHtml(name)}</h2>
+          <div class="detail-list">
+            ${detailsHTML || '<div class="detail-value">Нет дополнительных сведений</div>'}
+          </div>
+        </div>
+      `;
+      modal.style.display = 'block';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    window.closeModal = function() {
+      document.getElementById('personModal').style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('personModal');
+      if (event.target === modal) modal.style.display = 'none';
+    };
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') window.closeModal();
+    });
+
+    async function refreshTree() {
+      const rootContainer = document.getElementById('adaptiveTreeRoot');
+      nodeElementRegistry.clear();
+
+      rootContainer.innerHTML = '<div class="loading-spinner"><div class="spinner"></div>Загрузка структуры...</div>';
+
+      try {
+        const raw = await loadSheetData();
+        const tree = buildHierarchy(raw);
+        if (!tree) {
+          rootContainer.innerHTML = '<div class="error-box">❌ Не удалось построить дерево. Проверьте поля id, name, parent_id.</div>';
+          return;
+        }
+
+        const scaler = document.createElement('div');
+        scaler.className = 'tree-scaler';
+        scaler.style.transformOrigin = 'top left';
+        scaler.style.transition = 'transform 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+        
+        const workspace = document.createElement('div');
+        workspace.className = 'tree-workspace';
+
+        const treeDom = document.createElement('div');
+        treeDom.className = 'tree';
+
+        renderNode(tree, treeDom, '');
+        workspace.appendChild(treeDom);
+        scaler.appendChild(workspace);
+        rootContainer.innerHTML = '';
+        rootContainer.appendChild(scaler);
+
+        window.autoScaleEnabled = true;
+        currentScale = 1;
+        
+        const performInitialLayout = () => {
+          immediateDraw();
+          scheduleScaleUpdate();
+          
+          if (resizeObserver) resizeObserver.disconnect();
+          resizeObserver = new ResizeObserver(() => {
+            scheduleScaleUpdate();
+            scheduleDraw();
+          });
+          resizeObserver.observe(rootContainer);
+          resizeObserver.observe(workspace);
+          
+          window.addEventListener('resize', () => {
+            scheduleScaleUpdate();
+            scheduleDraw();
+          });
+          
+          // Несколько дополнительных перерисовок для стабильности
+          setTimeout(() => {
+            scheduleScaleUpdate();
+            immediateDraw();
+          }, 150);
+          setTimeout(() => {
+            scheduleScaleUpdate();
+            immediateDraw();
+          }, 400);
+          setTimeout(() => {
+            scheduleScaleUpdate();
+            immediateDraw();
+          }, 800);
+        };
+        
+        const images = workspace.querySelectorAll('img');
+        if (images.length > 0) {
+          let loadedCount = 0;
+          const imageLoaded = () => {
+            loadedCount++;
+            if (loadedCount === images.length) {
+              performInitialLayout();
+            }
+          };
+          images.forEach(img => {
+            if (img.complete) {
+              imageLoaded();
+            } else {
+              img.addEventListener('load', imageLoaded);
+              img.addEventListener('error', imageLoaded);
+            }
+          });
+          setTimeout(performInitialLayout, 800);
+        } else {
+          performInitialLayout();
+        }
+        
+        console.log("✓ Дерево загружено. Линии корректно отображаются при любом масштабе.");
+      } catch (error) {
+        console.error(error);
+        rootContainer.innerHTML = `<div class="error-box">⚠️ Ошибка: ${error.message}<br>Проверьте ID таблицы (${SHEET_ID}) и название листа "${SHEET_NAME}".</div>`;
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+      await refreshTree();
+    });
+  })();
 </script>
-
 </body>
 </html>
